@@ -5,7 +5,7 @@ const servers = [
     href: "/java-minecraft-server",
     title: "Java Minecraft",
     copy: "Paper 1.21.8, playable back to 1.20. Live map is on this page.",
-    ip: "216.228.185.138:25565",
+    ip: "mc.ll4sch.com",
   },
   {
     href: "/valheim",

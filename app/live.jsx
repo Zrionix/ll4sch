@@ -6,7 +6,7 @@ const STATUS_API =
   process.env.NEXT_PUBLIC_STATUS_API || "https://monitor.ll4sch.com/api/status";
 
 const PUBLIC = {
-  minecraft: "216.228.185.138:25565",
+  minecraft: "mc.ll4sch.com",
   valheim: "216.228.185.138:2456",
   bluemap: "map.ll4sch.com",
 };
