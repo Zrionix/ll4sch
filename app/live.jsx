@@ -40,15 +40,6 @@ function clamp(value) {
   return Math.max(0, Math.min(100, n));
 }
 
-function cpuTemp(host) {
-  const temps = host?.temps || [];
-  return (
-    temps.find((item) => /cpu|package|tctl|tdie/i.test(item.label || "")) ||
-    temps[0] ||
-    null
-  );
-}
-
 export function useStatus() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -80,7 +71,6 @@ export function useStatus() {
 }
 
 export function Usage({ host }) {
-  const temp = cpuTemp(host);
   const gpu = host?.gpu;
   const cpu = host?.cpu_percent;
   const ram = host?.ram_percent;
@@ -101,11 +91,6 @@ export function Usage({ host }) {
             : "waiting"}
         </small>
         <div className="bar"><i style={{ width: `${clamp(ram)}%` }} /></div>
-      </article>
-      <article className="meter">
-        <span>CPU temp</span>
-        <strong>{temp ? `${Math.round(temp.celsius)}\u00b0` : "\u2014"}</strong>
-        <small>{temp?.label || "No sensor yet"}</small>
       </article>
       <article className="meter">
         <span>GPU</span>
