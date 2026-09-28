@@ -3,16 +3,14 @@ $Dest = "C:\Project\ll4sch-wall"
 New-Item -ItemType Directory -Force -Path $Dest | Out-Null
 
 $Here = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Base = "https://raw.githubusercontent.com/Zrionix/ll4sch/main/server-wall"
 foreach ($name in @("wall.py", "wall.html", "start-wall.bat")) {
   $source = Join-Path $Here $name
-  if (Test-Path $source) {
-    Copy-Item $source (Join-Path $Dest $name) -Force
-  }
-}
-if (-not (Test-Path (Join-Path $Dest "wall.py"))) {
-  $Base = "https://raw.githubusercontent.com/Zrionix/ll4sch/main/server-wall"
-  foreach ($name in @("wall.py", "wall.html", "start-wall.bat")) {
-    Invoke-WebRequest -UseBasicParsing "$Base/$name" -OutFile (Join-Path $Dest $name)
+  $destFile = Join-Path $Dest $name
+  if ((Test-Path $source) -and ($source -ne $destFile)) {
+    Copy-Item $source $destFile -Force
+  } else {
+    Invoke-WebRequest -UseBasicParsing "$Base/$name" -OutFile $destFile
   }
 }
 if (-not (Test-Path (Join-Path $Dest "wall.py"))) {
