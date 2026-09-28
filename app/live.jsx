@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 const STATUS_API =
   process.env.NEXT_PUBLIC_STATUS_API || "https://monitor.ll4sch.com/api/status";
@@ -97,6 +97,7 @@ export function Usage({ host }) {
       <article className="meter">
         <span>CPU</span>
         <strong>{cpu == null ? "\u2014" : `${Math.round(cpu)}%`}</strong>
+        <small>whole box</small>
         <div className="bar"><i style={{ width: `${clamp(cpu)}%` }} /></div>
       </article>
       <article className="meter">
@@ -152,6 +153,58 @@ export function ServiceCards({ services }) {
   });
 }
 
+function formatRam(mb) {
+  const n = Number(mb);
+  if (!Number.isFinite(n)) return "\u2014";
+  if (n >= 1024) return `${(n / 1024).toFixed(1)} GB`;
+  if (n >= 10) return `${Math.round(n)} MB`;
+  return `${n.toFixed(1)} MB`;
+}
+
+function processRows(services) {
+  const seen = new Set();
+  const rows = [];
+  for (const svc of services) {
+    const proc = svc.process || {};
+    if (proc.pid != null && seen.has(proc.pid)) continue;
+    if (proc.pid != null) seen.add(proc.pid);
+    rows.push({
+      id: svc.id || svc.name,
+      name: svc.name || NAMES[svc.id] || svc.id,
+      cpu: proc.cpu_percent,
+      ram: proc.rss_mb ?? proc.memory_mb,
+      exe: proc.name || "",
+    });
+  }
+  return rows;
+}
+
+export function ProcessUsage({ services }) {
+  const rows = processRows(services);
+  const single = rows.length === 1;
+  return (
+    <section className="meters">
+      {rows.map((row) => (
+        <Fragment key={row.id}>
+          <article className="meter">
+            <span>{single ? "CPU" : `${row.name} CPU`}</span>
+            <strong>{row.cpu == null || row.cpu === "" ? "\u2014" : `${Math.round(Number(row.cpu))}%`}</strong>
+            <small>{row.exe || "this process"}</small>
+            {row.cpu == null || row.cpu === "" ? null : (
+              <div className="bar"><i style={{ width: `${clamp(row.cpu)}%` }} /></div>
+            )}
+          </article>
+          <article className="meter">
+            <span>{single ? "RAM" : `${row.name} RAM`}</span>
+            <strong>{formatRam(row.ram)}</strong>
+            <small>this process</small>
+          </article>
+        </Fragment>
+      ))}
+    </section>
+  );
+}
+
 export function LiveServer({ ids }) {
   const { data, error } = useStatus();
   const found = (data?.services || []).filter((svc) => ids.includes(svc.id));
@@ -160,7 +213,7 @@ export function LiveServer({ ids }) {
   return (
     <>
       {error && !data ? <p className="badge down">Status API offline ({error})</p> : null}
-      <Usage host={data?.host} />
+      <ProcessUsage services={services} />
       <section className="grid">
         <ServiceCards services={services} />
       </section>
