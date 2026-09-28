@@ -4,37 +4,38 @@ const servers = [
   {
     href: "/java-minecraft-server",
     title: "Java Minecraft",
-    copy: "Paper 1.21.8, playable back to 1.20. Live map is on this page.",
+    copy: "Java Edition. Live map on this page.",
     ip: "mc.ll4sch.com",
   },
   {
     href: "/valheim",
     title: "Valheim",
-    copy: "World Troglodies. Direct connect on the public port.",
+    copy: "World Troglodies. Direct connect.",
     ip: "216.228.185.138:2456",
   },
   {
     href: "/ai",
     title: "Local AI",
-    copy: "Token speed and GPU stats. Blank until the card is installed.",
-    ip: "Waiting on the GPU",
+    copy: "Token speed, context, and GPU.",
+    ip: "On the server",
   },
 ];
 
 export default function HomePage() {
   return (
     <>
-      <p className="kicker">ll4sch.com</p>
-      <h1>Game servers, public addresses.</h1>
+      <p className="kicker">ll4sch</p>
+      <h1>The server</h1>
       <p className="lead">
-        Join addresses for the box. The monitor shows who is actually up.
-        Ask Zrionix on Discord before you connect.
+        Public addresses. Ask Zrionix on Discord before you connect.
       </p>
-      <section className="grid">
+      <section className="directory">
         {servers.map((server) => (
-          <Link className="card" href={server.href} key={server.title}>
-            <h2>{server.title}</h2>
-            <p>{server.copy}</p>
+          <Link className="entry" href={server.href} key={server.title}>
+            <div>
+              <h2>{server.title}</h2>
+              <p>{server.copy}</p>
+            </div>
             <div className="ip">{server.ip}</div>
           </Link>
         ))}
