@@ -42,7 +42,7 @@
     }
     button.pinned { border-color: var(--accent); color: var(--accent); }
     .meters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-    .meter, .card, .logs {
+    .meter, .card, .logpane {
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 16px;
@@ -60,15 +60,45 @@
     .badge.up { color: var(--accent); }
     .badge.down { color: var(--down); }
     .addr { font-family: "Cascadia Mono", Consolas, monospace; font-size: 18px; margin: 12px 0 0; color: var(--ink); }
-    .logs { padding: 14px 16px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-    .logs h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 560; }
-    #log {
+    .logboard {
+      display: grid;
+      grid-template-columns: 1.45fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+    .logpane {
+      padding: 12px 14px;
+      min-height: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .logpane.main { grid-row: 1 / span 2; }
+    .logpane h2 {
+      margin: 0;
+      font-size: 12px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 560;
+    }
+    .logpane .src {
+      margin: 4px 0 8px;
+      color: var(--muted);
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .logpane pre {
       margin: 0;
       overflow: auto;
       white-space: pre-wrap;
       font-family: "Cascadia Mono", Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 12px;
+      line-height: 1.4;
       color: #ddd4c2;
     }
     .err { color: var(--down); }
@@ -89,10 +119,7 @@
   </header>
   <section class="meters" id="meters"></section>
   <section class="grid" id="cards"></section>
-  <section class="logs">
-    <h2>Live logs</h2>
-    <pre id="log">Waiting for logs…</pre>
-  </section>
+  <section class="logboard" id="logboard"></section>
   <script>
     const PUBLIC = {
       minecraft: "mc.ll4sch.com",
@@ -100,6 +127,13 @@
       bluemap: "map.ll4sch.com"
     };
     const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
+    const PANES = [
+      { id: "main", title: "Main" },
+      { id: "minecraft", title: "Paper" },
+      { id: "valheim", title: "Valheim" },
+      { id: "discord", title: "Discord" },
+      { id: "bluemap", title: "BlueMap" }
+    ];
 
     function clamp(n) {
       n = Number(n);
@@ -134,6 +168,47 @@
         '</span><p class="badge ' + (on ? "up" : wait ? "" : "down") + '">' + badge +
         '</p></div><p class="addr">' + address(svc) + '</p><p>' + players + '</p></article>';
     }
+    function byId(logs) {
+      const map = {};
+      (logs || []).forEach(function (log) { map[log.id] = log; });
+      return map;
+    }
+    function mainText(logs, note) {
+      const chunks = [];
+      (logs || []).forEach(function (log) {
+        if (!log.lines || !log.lines.length) return;
+        if (log.id === "main") {
+          chunks.push(log.lines.join("\n"));
+          return;
+        }
+        chunks.push("[" + log.title + "]");
+        chunks.push(log.lines.slice(-16).join("\n"));
+      });
+      return chunks.join("\n") || note || "No main log yet.";
+    }
+    function ensurePanes() {
+      const board = document.getElementById("logboard");
+      if (board.dataset.ready === "1") return;
+      board.dataset.ready = "1";
+      board.innerHTML = PANES.map(function (pane) {
+        return '<article class="logpane' + (pane.id === "main" ? " main" : "") + '">' +
+          '<h2>' + pane.title + '</h2>' +
+          '<p class="src" id="src-' + pane.id + '"></p>' +
+          '<pre id="log-' + pane.id + '"></pre></article>';
+      }).join("");
+    }
+    function setLog(id, source, text) {
+      const pre = document.getElementById("log-" + id);
+      const src = document.getElementById("src-" + id);
+      if (!pre) return;
+      const atBottom = pre.scrollTop + pre.clientHeight >= pre.scrollHeight - 24;
+      if (pre.textContent !== text) pre.textContent = text;
+      if (src) {
+        src.textContent = source || "";
+        src.title = source || "";
+      }
+      if (atBottom) pre.scrollTop = pre.scrollHeight;
+    }
     function paint(data) {
       const host = (data.status && data.status.host) || {};
       const services = ((data.status && data.status.services) || []).slice().sort(function (a, b) {
@@ -158,13 +233,19 @@
           gpu ? gpu.name + (gpu.mem_used_mb != null ? " · " + Math.round(gpu.mem_used_mb) + "/" + Math.round(gpu.mem_total_mb) + " MB" : "") : "Not installed",
           gpu ? gpu.util_percent : 0);
       document.getElementById("cards").innerHTML = services.map(card).join("") || "<p>No services</p>";
-      const blocks = (data.logs || []).map(function (log) {
-        return log.source + "\n" + (log.lines || []).join("\n");
+      ensurePanes();
+      const logs = byId(data.logs);
+      setLog("main", "", mainText(data.logs, data.log_note));
+      PANES.forEach(function (pane) {
+        if (pane.id === "main") return;
+        const log = logs[pane.id] || {};
+        const lines = log.lines || [];
+        setLog(
+          pane.id,
+          log.source || "",
+          lines.length ? lines.join("\n") : "No " + pane.title + " log file found."
+        );
       });
-      const el = document.getElementById("log");
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
-      el.textContent = blocks.join("\n\n") || (data.log_note || "No console logs found yet.");
-      if (atBottom) el.scrollTop = el.scrollHeight;
       const pin = document.getElementById("pin");
       pin.className = data.pinned ? "pinned" : "";
       pin.textContent = data.pinned ? "Pinned" : "Released";
@@ -175,7 +256,8 @@
         const res = await fetch("/api/board", { cache: "no-store" });
         paint(await res.json());
       } catch (err) {
-        document.getElementById("log").textContent = "Board offline";
+        ensurePanes();
+        setLog("main", "", "Board offline");
       }
     }
     async function setPinned(pinned) {
