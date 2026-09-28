@@ -39,14 +39,14 @@ export function LogFeed({ id, title }) {
     <section className="console" ref={scroller}>
       <div className="row">
         <h2>{title}</h2>
-        <p className="badge">{lines.length ? `${Math.min(lines.length, 120)} lines` : "waiting"}</p>
+        <p className="badge">{lines.length ? `${Math.min(lines.length, 120)} lines` : "\u2014"}</p>
       </div>
       {source ? <p className="console-path">{source}</p> : null}
       <pre>
         {text ||
           (error && !data
             ? "Status feed is offline."
-            : "No console lines from the server yet.")}
+            : "No lines.")}
       </pre>
     </section>
   );
