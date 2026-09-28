@@ -1,31 +1,43 @@
 import Link from "next/link";
 
+const servers = [
+  {
+    href: "/java-minecraft-server",
+    title: "Java Minecraft",
+    copy: "Paper 1.21.8, playable back to 1.20. Live map is on this page.",
+    ip: "216.228.185.138:25565",
+  },
+  {
+    href: "/bettermc-java-minecraft-server",
+    title: "BetterMC",
+    copy: "2026 world. Ask Zrionix on Discord for a whitelist slot.",
+    ip: "216.228.185.138:25564",
+  },
+  {
+    href: "/servermonitor",
+    title: "Valheim",
+    copy: "Troglodies. Status for the box lives on the monitor.",
+    ip: "216.228.185.138:2456",
+  },
+];
+
 export default function HomePage() {
   return (
     <>
-      <p className="kicker">Service hub</p>
-      <h1>Welcome to ll4sch.com</h1>
+      <p className="kicker">ll4sch.com</p>
+      <h1>Game servers, public addresses.</h1>
       <p className="lead">
-        ll4sch.com holds the public addresses for our hosted services — Minecraft,
-        Valheim, KSP, and the rest of the box. This is the replacement for the
-        old Google Site.
+        Join addresses for the box. The monitor shows who is actually up.
+        Ask Zrionix on Discord before you connect.
       </p>
       <section className="grid">
-        <Link className="card" href="/java-minecraft-server">
-          <h2>Java Minecraft</h2>
-          <p>Paper world. Join at mc.ll4sch.com. Live map on the monitor page.</p>
-          <div className="ip">mc.ll4sch.com</div>
-        </Link>
-        <Link className="card" href="/bettermc-java-minecraft-server">
-          <h2>BetterMC</h2>
-          <p>A new start in 2026. Ask CoMinder on Discord before joining.</p>
-          <div className="ip">216.228.185.138:25564</div>
-        </Link>
-        <Link className="card" href="/servermonitor">
-          <h2>Server monitor</h2>
-          <p>Live status for Paper, Valheim, Discord bot, plus the BlueMap embed.</p>
-          <div className="ip">/servermonitor</div>
-        </Link>
+        {servers.map((server) => (
+          <Link className="card" href={server.href} key={server.title}>
+            <h2>{server.title}</h2>
+            <p>{server.copy}</p>
+            <div className="ip">{server.ip}</div>
+          </Link>
+        ))}
       </section>
     </>
   );

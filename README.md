@@ -3,9 +3,9 @@
 Custom site to replace the Google Site. Pages:
 
 - `/` home
-- `/java-minecraft-server` Paper / vanilla Java (`mc.ll4sch.com`)
+- `/java-minecraft-server` Paper (`216.228.185.138:25565`) plus BlueMap
 - `/bettermc-java-minecraft-server` BetterMC (`216.228.185.138:25564`)
-- `/servermonitor` live box status + BlueMap embed
+- `/servermonitor` live box status, public addresses only
 
 ## Local
 
@@ -28,4 +28,4 @@ NEXT_PUBLIC_STATUS_API=https://monitor.ll4sch.com/api/status
 NEXT_PUBLIC_MAP_URL=https://map.ll4sch.com/
 ```
 
-If `monitor.ll4sch.com` is not up yet, `/servermonitor` still shows join info and embeds BlueMap from `map.ll4sch.com`.
+If `monitor.ll4sch.com` is not up yet, `/servermonitor` still lists the public join addresses. BlueMap is embedded on the Java page from `map.ll4sch.com`.
