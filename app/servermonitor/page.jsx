@@ -5,11 +5,9 @@ import { LiveBoard } from "../live";
 export default function MonitorPage() {
   return (
     <>
-      <p className="kicker">Live</p>
-      <h1>Server monitor</h1>
-      <p className="lead">
-        The whole box. Java and Valheim each show only their own status.
-      </p>
+      <p className="kicker">Status</p>
+      <h1>Monitor</h1>
+      <p className="lead">CPU, memory, and every service on the server.</p>
       <LiveBoard />
     </>
   );
