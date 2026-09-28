@@ -70,6 +70,7 @@ h1 {
   max-width: 14ch;
 }
 .lead { margin: 0; max-width: 52ch; color: var(--muted); }
+.lead a { color: var(--accent); }
 
 .grid {
   display: grid;

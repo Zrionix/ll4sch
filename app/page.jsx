@@ -14,9 +14,9 @@ const servers = [
     ip: "216.228.185.138:25564",
   },
   {
-    href: "/servermonitor",
+    href: "/valheim",
     title: "Valheim",
-    copy: "Troglodies. Status for the box lives on the monitor.",
+    copy: "World Troglodies. Direct connect on the public port.",
     ip: "216.228.185.138:2456",
   },
 ];

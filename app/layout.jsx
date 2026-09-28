@@ -18,6 +18,7 @@ const links = [
   ["/", "Home"],
   ["/java-minecraft-server", "Java"],
   ["/bettermc-java-minecraft-server", "BetterMC"],
+  ["/valheim", "Valheim"],
   ["/servermonitor", "Monitor"],
 ];
 
