@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import "./console.css";
 import { useStatus } from "./live";
 
 function asLines(value) {
