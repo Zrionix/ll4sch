@@ -1,6 +1,7 @@
 """Fullscreen ll4sch status wall for the SERVER desktop.
 
 Shows Paper, Valheim, BlueMap, and the Discord bot plus CPU, RAM, disk, and GPU.
+The log board has one main console and a separate console for each server.
 Starts an Edge app window on the primary monitor and keeps it above other windows
 until Escape, the pin button, or a manual focus change releases it.
 """
@@ -33,7 +34,17 @@ SKIP_DIRS = {
     "edge-profile", "__pycache__", "windows", "program files", "program files (x86)",
     "$recycle.bin", "system volume information",
 }
-LOG_NAMES = {"latest.log", "debug.log", "server.log", "output_log.txt", "logoutput.log"}
+LOG_NAMES = {
+    "latest.log", "debug.log", "server.log", "output_log.txt",
+    "logoutput.log", "console.log",
+}
+SERVERS = (
+    ("main", "Main"),
+    ("minecraft", "Paper"),
+    ("valheim", "Valheim"),
+    ("discord", "Discord"),
+    ("bluemap", "BlueMap"),
+)
 
 state_lock = threading.Lock()
 state = {
@@ -138,13 +149,39 @@ def gpu_stats():
     }
 
 
-def tail(path: str, max_lines: int = 28, max_bytes: int = 48000) -> list[str]:
+def tail(path: str, max_lines: int = 40, max_bytes: int = 64000) -> list[str]:
     with open(path, "rb") as handle:
         handle.seek(0, os.SEEK_END)
         size = handle.tell()
         handle.seek(max(0, size - max_bytes))
         data = handle.read().decode("utf-8", "replace")
     return data.splitlines()[-max_lines:]
+
+
+def classify(path: str) -> str:
+    low = path.lower()
+    name = os.path.basename(low)
+    if "valheim" in low:
+        return "valheim"
+    if "discord" in low or "demetrius" in low:
+        return "discord"
+    if "bluemap" in low:
+        return "bluemap"
+    if "paper" in low or "minecraft" in low or "papermc" in low or name == "latest.log":
+        return "minecraft"
+    return "main"
+
+
+def rank(name: str) -> int:
+    order = {
+        "latest.log": 0,
+        "server.log": 1,
+        "console.log": 2,
+        "output_log.txt": 3,
+        "logoutput.log": 4,
+        "debug.log": 8,
+    }
+    return order.get(name.lower(), 5)
 
 
 def discover_logs() -> list[dict]:
@@ -156,14 +193,17 @@ def discover_logs() -> list[dict]:
             continue
         for dirpath, dirnames, filenames in os.walk(root):
             depth = len(Path(dirpath).relative_to(root).parts)
-            if depth > 4:
+            if depth > 5:
                 dirnames[:] = []
                 continue
             dirnames[:] = [name for name in dirnames if name.lower() not in SKIP_DIRS]
             folder = dirpath.lower()
             for name in filenames:
                 low = name.lower()
-                interesting = low in LOG_NAMES or (low.endswith(".log") and ("log" in folder or "valheim" in folder or "paper" in folder or "discord" in folder))
+                interesting = low in LOG_NAMES or (
+                    low.endswith(".log")
+                    and any(token in folder for token in ("log", "valheim", "paper", "discord", "bluemap", "minecraft"))
+                )
                 if not interesting:
                     continue
                 path = os.path.join(dirpath, name)
@@ -173,22 +213,27 @@ def discover_logs() -> list[dict]:
                     continue
                 if stat.st_size <= 0 or stat.st_size > 80_000_000:
                     continue
-                found.append((stat.st_mtime, path))
-    found.sort(reverse=True)
+                found.append((rank(name), -stat.st_mtime, path, classify(path)))
+
+    best = {}
+    for item in found:
+        kind = item[3]
+        previous = best.get(kind)
+        if previous is None or item[0] < previous[0] or (item[0] == previous[0] and item[1] < previous[1]):
+            best[kind] = item
+
     picked = []
-    seen = set()
-    for _mtime, path in found:
-        key = str(Path(path).parent).lower()
-        if key in seen:
+    for kind, title in SERVERS:
+        item = best.get(kind)
+        if not item:
+            picked.append({"id": kind, "title": title, "source": "", "lines": []})
             continue
-        seen.add(key)
+        path = item[2]
         try:
-            lines = tail(path)
+            lines = tail(path, 36 if kind == "main" else 48)
         except OSError:
-            continue
-        picked.append({"source": path, "lines": lines})
-        if len(picked) >= 3:
-            break
+            lines = []
+        picked.append({"id": kind, "title": title, "source": path, "lines": lines})
     return picked
 
 
@@ -205,9 +250,14 @@ def sample_machine() -> None:
         if stale:
             try:
                 logs = discover_logs()
-                note = "" if logs else "No latest.log / server.log found under C:\\Project, Desktop, or Documents."
+                note = ""
+                if not any(log["lines"] for log in logs):
+                    note = "No log files found under C:\\Project, Desktop, or Documents."
             except Exception as exc:
-                logs = []
+                logs = [
+                    {"id": kind, "title": title, "source": "", "lines": []}
+                    for kind, title in SERVERS
+                ]
                 note = str(exc)
             with state_lock:
                 state["logs"] = logs
@@ -307,7 +357,6 @@ def focus_loop() -> None:
     SWP_SHOWWINDOW = 0x0040
     SWP_NOMOVE = 0x0002
     SWP_NOSIZE = 0x0001
-    SW_SHOWMAXIMIZED = 3
     enum_proc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_void_p, ctypes.c_void_p)
 
     def find_hwnd():
@@ -347,7 +396,7 @@ def focus_loop() -> None:
             height = user32.GetSystemMetrics(1)
             foreground = user32.GetForegroundWindow()
             if pinned:
-                user32.ShowWindow(hwnd, SW_SHOWMAXIMIZED)
+                user32.ShowWindow(hwnd, 3)
                 user32.SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, width, height, SWP_SHOWWINDOW)
                 if force or not held_foreground:
                     user32.keybd_event(0x12, 0, 0, 0)
