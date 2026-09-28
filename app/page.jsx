@@ -13,6 +13,12 @@ const servers = [
     copy: "World Troglodies. Direct connect on the public port.",
     ip: "216.228.185.138:2456",
   },
+  {
+    href: "/ai",
+    title: "Local AI",
+    copy: "Token speed and GPU stats. Blank until the card is installed.",
+    ip: "Waiting on the GPU",
+  },
 ];
 
 export default function HomePage() {

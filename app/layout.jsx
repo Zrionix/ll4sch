@@ -19,6 +19,7 @@ const links = [
   ["/java-minecraft-server", "Java"],
   ["/valheim", "Valheim"],
   ["/servermonitor", "Monitor"],
+  ["/ai", "AI"],
 ];
 
 export default function RootLayout({ children }) {

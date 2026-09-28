@@ -163,6 +163,8 @@ a.card:hover { border-color: #4a584c; }
   letter-spacing: -0.04em;
   line-height: 1;
 }
+.meter.lead-stat { grid-column: span 2; }
+.meter.lead-stat strong { font-size: 56px; }
 .meter small {
   display: block;
   margin-top: 8px;
@@ -202,4 +204,6 @@ footer {
 @media (max-width: 640px) {
   h1 { font-size: 40px; }
   .card { min-height: 0; }
+  .meter.lead-stat { grid-column: auto; }
+  .meter.lead-stat strong { font-size: 40px; }
 }
