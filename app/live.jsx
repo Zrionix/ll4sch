@@ -97,7 +97,7 @@ export function Usage({ host }) {
       <article className="meter">
         <span>CPU</span>
         <strong>{cpu == null ? "\u2014" : `${Math.round(cpu)}%`}</strong>
-        <small>whole box</small>
+        <small>server</small>
         <div className="bar"><i style={{ width: `${clamp(cpu)}%` }} /></div>
       </article>
       <article className="meter">
@@ -106,7 +106,7 @@ export function Usage({ host }) {
         <small>
           {host
             ? `${host.ram_used_gb?.toFixed?.(1) ?? host.ram_used_gb} / ${host.ram_total_gb} GB`
-            : "waiting"}
+            : "server"}
         </small>
         <div className="bar"><i style={{ width: `${clamp(ram)}%` }} /></div>
       </article>
@@ -116,7 +116,7 @@ export function Usage({ host }) {
         <small>
           {gpu
             ? `${gpu.name}${gpu.temp_c != null ? ` \u00b7 ${Math.round(gpu.temp_c)}\u00b0` : ""}${gpu.mem_used_mb != null ? ` \u00b7 ${gpu.mem_used_mb}/${gpu.mem_total_mb} MB` : ""}`
-            : "Not installed"}
+            : "No GPU"}
         </small>
         {gpu ? (
           <div className="bar"><i style={{ width: `${clamp(gpu.util_percent)}%` }} /></div>
@@ -134,7 +134,7 @@ export function ServiceCards({ services }) {
         <div className="row">
           <h2>{svc.name || NAMES[svc.id] || svc.id}</h2>
           <p className={`badge ${svc.online == null ? "" : svc.online ? "up" : "down"}`}>
-            {svc.online == null ? "waiting" : svc.online ? "online" : "down"}
+            {svc.online == null ? "\u2014" : svc.online ? "online" : "down"}
           </p>
         </div>
         {address ? <div className="ip">{address}</div> : null}
@@ -189,7 +189,7 @@ export function ProcessUsage({ services }) {
           <article className="meter">
             <span>{single ? "CPU" : `${row.name} CPU`}</span>
             <strong>{row.cpu == null || row.cpu === "" ? "\u2014" : `${Math.round(Number(row.cpu))}%`}</strong>
-            <small>{row.exe || "this process"}</small>
+            <small>{row.exe || "process"}</small>
             {row.cpu == null || row.cpu === "" ? null : (
               <div className="bar"><i style={{ width: `${clamp(row.cpu)}%` }} /></div>
             )}
@@ -197,7 +197,7 @@ export function ProcessUsage({ services }) {
           <article className="meter">
             <span>{single ? "RAM" : `${row.name} RAM`}</span>
             <strong>{formatRam(row.ram)}</strong>
-            <small>this process</small>
+            <small>process</small>
           </article>
         </Fragment>
       ))}
@@ -267,7 +267,7 @@ export function AiBoard() {
   const model = ai.model || ai.model_name || null;
   const vramPct = gpu?.mem_total_mb ? (Number(gpu.mem_used_mb) / Number(gpu.mem_total_mb)) * 100 : null;
   const contextPct = ai.context_max ? (Number(ai.context_used) / Number(ai.context_max)) * 100 : null;
-  let state = "GPU not installed";
+  let state = "No GPU";
   let stateClass = "";
   if (error && !data) {
     state = "Status API offline";
@@ -279,7 +279,7 @@ export function AiBoard() {
     state = "model down";
     stateClass = "down";
   } else if (gpu) {
-    state = "GPU in, model waiting";
+    state = "No model";
   }
 
   return (
@@ -287,7 +287,7 @@ export function AiBoard() {
       <div className="host">
         <span>{data?.host?.hostname || "SERVER"}</span>
         <span className={`badge ${stateClass}`}>{state}</span>
-        {model ? <span>{model}</span> : <span>No model loaded</span>}
+        {model ? <span>{model}</span> : <span>No model</span>}
         {ai.backend ? <span>{ai.backend}</span> : null}
         {ai.uptime_seconds != null ? <span>{formatUptime(ai.uptime_seconds)}</span> : null}
       </div>
@@ -301,18 +301,18 @@ export function AiBoard() {
           note="tokens in the window"
           pct={contextPct}
         />
-        <Meter label="Queue" value={dash(ai.queue)} note={ai.active != null ? `${ai.active} running` : "waiting requests"} />
+        <Meter label="Queue" value={dash(ai.queue)} note={ai.active != null ? `${ai.active} running` : "requests"} />
         <Meter label="Last reply" value={dash(ai.last_latency_ms)} note="milliseconds" />
         <Meter
           label="GPU"
           value={gpu?.util_percent == null ? "\u2014" : `${Math.round(gpu.util_percent)}%`}
-          note={gpu?.name || "Not installed"}
+          note={gpu?.name || "No GPU"}
           pct={gpu?.util_percent}
         />
         <Meter
           label="VRAM"
           value={gpu?.mem_total_mb ? `${(Number(gpu.mem_used_mb || 0) / 1024).toFixed(1)} / ${(Number(gpu.mem_total_mb) / 1024).toFixed(1)} GB` : "\u2014"}
-          note={gpu ? "on the card" : "Not installed"}
+          note={gpu ? "on the card" : "No GPU"}
           pct={vramPct}
         />
         <Meter label="GPU temp" value={gpu?.temp_c == null ? "\u2014" : `${Math.round(gpu.temp_c)}\u00b0`} note="card" />
@@ -324,4 +324,22 @@ export function AiBoard() {
       </section>
     </>
   );
+}
+
+const DROPS = [
+  ["26.3", "Wilderness Bound"],
+  ["26.2", "Chaos Cubed"],
+  ["26.1", "Tiny Takeover"],
+];
+
+export function Edition({ id }) {
+  const { data } = useStatus();
+  const svc = (data?.services || []).find((item) => item.id === id);
+  const version = svc?.version || "";
+  const drop = DROPS.find(([key]) => version.includes(key));
+  const parts = [];
+  if (drop) parts.push(drop[1]);
+  if (version) parts.push(version);
+  const detail = parts.length ? `${parts.join(". ")} on the server.` : "Java Edition on the server.";
+  return <p className="lead">{detail} Ask Zrionix on Discord to join.</p>;
 }
