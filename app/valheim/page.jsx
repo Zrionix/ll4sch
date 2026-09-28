@@ -9,8 +9,8 @@ export default function ValheimPage() {
       <p className="kicker">Dedicated</p>
       <h1>Valheim</h1>
       <p className="lead">
-        World Troglodies. Direct connect on the public address below. Ask
-        Zrionix on Discord before you join.
+        World Troglodies. Direct connect on the address below. Ask Zrionix
+        on Discord before you join.
       </p>
       <div className="ip hero">216.228.185.138:2456</div>
       <LiveServer ids={["valheim"]} />
