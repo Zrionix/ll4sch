@@ -6,11 +6,9 @@ export default function AiPage() {
   return (
     <>
       <p className="kicker">Local model</p>
-      <h1>AI status</h1>
+      <h1>AI</h1>
       <p className="lead">
-        Decode speed, prefill, time to first token, context, queue, and the
-        GPU. Nothing here is invented. The numbers stay blank until the card
-        is installed and a model is running on the server.
+        Token speed, context, and GPU on the server.
       </p>
       <AiBoard />
     </>
