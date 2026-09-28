@@ -8,12 +8,6 @@ const servers = [
     ip: "216.228.185.138:25565",
   },
   {
-    href: "/bettermc-java-minecraft-server",
-    title: "BetterMC",
-    copy: "2026 world. Ask Zrionix on Discord for a whitelist slot.",
-    ip: "216.228.185.138:25564",
-  },
-  {
     href: "/valheim",
     title: "Valheim",
     copy: "World Troglodies. Direct connect on the public port.",

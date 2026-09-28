@@ -4,7 +4,6 @@ Custom site to replace the Google Site. Pages:
 
 - `/` home
 - `/java-minecraft-server` Paper (`216.228.185.138:25565`) plus BlueMap
-- `/bettermc-java-minecraft-server` BetterMC (`216.228.185.138:25564`)
 - `/valheim` Valheim Troglodies (`216.228.185.138:2456`)
 - `/servermonitor` live box status, public addresses only
 
