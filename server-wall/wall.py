@@ -184,10 +184,25 @@ def rank(name: str) -> int:
     return order.get(name.lower(), 5)
 
 
+PINNED_LOGS = {
+    "minecraft": r"C:\Users\Admin\Desktop\PaperMC server\logs\latest.log",
+    "valheim": r"C:\Users\Admin\Documents\ValheimServerLogs\troglodies.log",
+    "bluemap": r"C:\Users\Admin\Desktop\PaperMC server\bluemap\logs\webserver.log",
+}
+
+
+def ignored_log(path: str) -> bool:
+    low = path.lower().replace("/", "\\")
+    if "\\old\\" in low:
+        return True
+    return False
+
+
 def discover_logs() -> list[dict]:
     home = Path.home()
     roots = [Path(r"C:\Project"), home / "Desktop", home / "Documents"]
     found = []
+    now = time.time()
     for root in roots:
         if not root.is_dir():
             continue
@@ -207,13 +222,18 @@ def discover_logs() -> list[dict]:
                 if not interesting:
                     continue
                 path = os.path.join(dirpath, name)
+                if ignored_log(path):
+                    continue
                 try:
                     stat = os.stat(path)
                 except OSError:
                     continue
                 if stat.st_size <= 0 or stat.st_size > 80_000_000:
                     continue
-                found.append((rank(name), -stat.st_mtime, path, classify(path)))
+                kind = classify(path)
+                if kind == "main" and now - stat.st_mtime > 2 * 86400:
+                    continue
+                found.append((rank(name), -stat.st_mtime, path, kind))
 
     best = {}
     for item in found:
@@ -221,6 +241,10 @@ def discover_logs() -> list[dict]:
         previous = best.get(kind)
         if previous is None or item[0] < previous[0] or (item[0] == previous[0] and item[1] < previous[1]):
             best[kind] = item
+
+    for kind, path in PINNED_LOGS.items():
+        if os.path.isfile(path):
+            best[kind] = (0, 0, path, kind)
 
     picked = []
     for kind, title in SERVERS:
