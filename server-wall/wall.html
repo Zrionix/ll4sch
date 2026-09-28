@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ll4sch wall</title>
+  <style>
+    :root {
+      --bg: #12110e;
+      --panel: #1c1a16;
+      --ink: #efe7d6;
+      --muted: #9a917f;
+      --line: rgba(239, 231, 214, 0.14);
+      --accent: #c4f24e;
+      --down: #ff5a36;
+      --warn: #e2b15a;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; background: var(--bg); color: var(--ink); }
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      display: grid;
+      grid-template-rows: auto auto auto 1fr;
+      height: 100vh;
+      overflow: hidden;
+      padding: 22px 26px 18px;
+      gap: 16px;
+    }
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
+    .brand { display: flex; flex-direction: column; gap: 4px; }
+    .kicker { margin: 0; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); font-size: 12px; }
+    h1 { margin: 0; font-size: 34px; font-weight: 560; letter-spacing: -0.03em; }
+    .meta { color: var(--muted); font-family: "Cascadia Mono", Consolas, monospace; font-size: 14px; display: flex; gap: 16px; }
+    button {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.pinned { border-color: var(--accent); color: var(--accent); }
+    .meters { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .meter, .card, .logs {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+    .meter { padding: 14px 16px 12px; }
+    .meter span, .card .name { color: var(--muted); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+    .meter strong { display: block; font-size: 32px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .meter small, .card p { color: var(--muted); display: block; min-height: 1.2em; }
+    .bar { height: 4px; background: #2a2823; border-radius: 99px; margin-top: 10px; overflow: hidden; }
+    .bar i { display: block; height: 100%; background: var(--accent); width: 0; }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .card { padding: 16px; min-height: 148px; }
+    .row { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .badge { margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .badge.up { color: var(--accent); }
+    .badge.down { color: var(--down); }
+    .addr { font-family: "Cascadia Mono", Consolas, monospace; font-size: 18px; margin: 12px 0 0; color: var(--ink); }
+    .logs { padding: 14px 16px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+    .logs h2 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 560; }
+    #log {
+      margin: 0;
+      overflow: auto;
+      white-space: pre-wrap;
+      font-family: "Cascadia Mono", Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #ddd4c2;
+    }
+    .err { color: var(--down); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <p class="kicker">ll4sch</p>
+      <h1>Server wall</h1>
+    </div>
+    <div class="meta">
+      <span id="host">SERVER</span>
+      <span id="up">—</span>
+      <span id="clock">—</span>
+    </div>
+    <button id="pin" class="pinned" type="button">Pinned</button>
+  </header>
+  <section class="meters" id="meters"></section>
+  <section class="grid" id="cards"></section>
+  <section class="logs">
+    <h2>Live logs</h2>
+    <pre id="log">Waiting for logs…</pre>
+  </section>
+  <script>
+    const PUBLIC = {
+      minecraft: "mc.ll4sch.com",
+      valheim: "216.228.185.138:2456",
+      bluemap: "map.ll4sch.com"
+    };
+    const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
+
+    function clamp(n) {
+      n = Number(n);
+      if (!isFinite(n)) return 0;
+      return Math.max(0, Math.min(100, n));
+    }
+    function uptime(seconds) {
+      if (seconds == null) return "—";
+      const h = Math.floor(seconds / 3600);
+      const d = Math.floor(h / 24);
+      if (d > 0) return d + "d " + (h % 24) + "h up";
+      const m = Math.floor((seconds % 3600) / 60);
+      return h + "h " + m + "m up";
+    }
+    function meter(label, value, note, pct) {
+      return '<article class="meter"><span>' + label + '</span><strong>' + value +
+        '</strong><small>' + (note || "") + '</small><div class="bar"><i style="width:' +
+        clamp(pct) + '%"></i></div></article>';
+    }
+    function address(svc) {
+      if (PUBLIC[svc.id]) return PUBLIC[svc.id];
+      return "";
+    }
+    function card(svc) {
+      const on = svc.online === true;
+      const wait = svc.online == null;
+      const badge = wait ? "waiting" : on ? "online" : "down";
+      const players = svc.players_online != null
+        ? "Players " + svc.players_online + (svc.players_max != null ? " / " + svc.players_max : "")
+        : (svc.motd || svc.version || "");
+      return '<article class="card"><div class="row"><span class="name">' + (svc.name || svc.id) +
+        '</span><p class="badge ' + (on ? "up" : wait ? "" : "down") + '">' + badge +
+        '</p></div><p class="addr">' + address(svc) + '</p><p>' + players + '</p></article>';
+    }
+    function paint(data) {
+      const host = (data.status && data.status.host) || {};
+      const services = ((data.status && data.status.services) || []).slice().sort(function (a, b) {
+        return (ORDER.indexOf(a.id) + 1 || 99) - (ORDER.indexOf(b.id) + 1 || 99);
+      });
+      document.getElementById("host").textContent = host.hostname || "SERVER";
+      document.getElementById("up").textContent = uptime(host.uptime_seconds);
+      const gpu = data.gpu;
+      const disk = (data.disks && data.disks[0]) || {};
+      const extra = (data.disks || []).slice(1).map(function (d) {
+        return d.mount + " " + Math.round(d.percent) + "%";
+      }).join(" · ");
+      document.getElementById("meters").innerHTML =
+        meter("CPU", host.cpu_percent == null ? "—" : Math.round(host.cpu_percent) + "%", "host", host.cpu_percent) +
+        meter("RAM", host.ram_percent == null ? "—" : Math.round(host.ram_percent) + "%",
+          host.ram_used_gb != null ? Number(host.ram_used_gb).toFixed(1) + " / " + host.ram_total_gb + " GB" : "",
+          host.ram_percent) +
+        meter("Disk", disk.percent == null ? "—" : Math.round(disk.percent) + "%",
+          (disk.mount || "C:") + (disk.free_gb != null ? " · " + disk.free_gb + " GB free" : "") + (extra ? " · " + extra : ""),
+          disk.percent) +
+        meter("GPU", gpu && gpu.util_percent != null ? Math.round(gpu.util_percent) + "%" : "—",
+          gpu ? gpu.name + (gpu.mem_used_mb != null ? " · " + Math.round(gpu.mem_used_mb) + "/" + Math.round(gpu.mem_total_mb) + " MB" : "") : "Not installed",
+          gpu ? gpu.util_percent : 0);
+      document.getElementById("cards").innerHTML = services.map(card).join("") || "<p>No services</p>";
+      const blocks = (data.logs || []).map(function (log) {
+        return log.source + "\n" + (log.lines || []).join("\n");
+      });
+      const el = document.getElementById("log");
+      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 24;
+      el.textContent = blocks.join("\n\n") || (data.log_note || "No console logs found yet.");
+      if (atBottom) el.scrollTop = el.scrollHeight;
+      const pin = document.getElementById("pin");
+      pin.className = data.pinned ? "pinned" : "";
+      pin.textContent = data.pinned ? "Pinned" : "Released";
+      if (data.status_error) document.getElementById("up").textContent = data.status_error;
+    }
+    async function tick() {
+      try {
+        const res = await fetch("/api/board", { cache: "no-store" });
+        paint(await res.json());
+      } catch (err) {
+        document.getElementById("log").textContent = "Board offline";
+      }
+    }
+    async function setPinned(pinned) {
+      await fetch("/api/pin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pinned: pinned })
+      });
+      tick();
+    }
+    document.getElementById("pin").addEventListener("click", function () {
+      const pinned = document.getElementById("pin").textContent !== "Pinned";
+      setPinned(pinned);
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") setPinned(false);
+    });
+    function clock() {
+      document.getElementById("clock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    clock();
+    setInterval(clock, 10000);
+    tick();
+    setInterval(tick, 3000);
+  </script>
+</body>
+</html>
