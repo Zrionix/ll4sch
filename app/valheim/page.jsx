@@ -1,6 +1,7 @@
 import { LiveServer } from "../live";
+import { LogFeed } from "../logs";
 
-export const metadata = { title: "Valheim — ll4sch" };
+export const metadata = { title: "Valheim \u2014 ll4sch" };
 
 export default function ValheimPage() {
   return (
@@ -13,6 +14,7 @@ export default function ValheimPage() {
       </p>
       <div className="ip hero">216.228.185.138:2456</div>
       <LiveServer ids={["valheim"]} />
+      <LogFeed id="valheim" title="Valheim console" />
     </>
   );
 }
