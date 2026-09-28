@@ -50,6 +50,13 @@ function clamp(value) {
   return Math.max(0, Math.min(100, n));
 }
 
+function dash(value, digits) {
+  if (value == null || value === "") return "\u2014";
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "\u2014";
+  return digits == null ? String(Math.round(n)) : n.toFixed(digits);
+}
+
 export function useStatus() {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
@@ -180,6 +187,87 @@ export function LiveBoard() {
       <Usage host={host} />
       <section className="grid">
         <ServiceCards services={services} />
+      </section>
+    </>
+  );
+}
+
+function Meter({ label, value, note, pct, lead }) {
+  return (
+    <article className={lead ? "meter lead-stat" : "meter"}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+      {note ? <small>{note}</small> : null}
+      {pct == null ? null : (
+        <div className="bar"><i style={{ width: `${clamp(pct)}%` }} /></div>
+      )}
+    </article>
+  );
+}
+
+export function AiBoard() {
+  const { data, error } = useStatus();
+  const ai = data?.ai || {};
+  const gpu = data?.host?.gpu || ai.gpu || null;
+  const online = ai.online === true;
+  const down = ai.online === false;
+  const model = ai.model || ai.model_name || null;
+  const vramPct = gpu?.mem_total_mb ? (Number(gpu.mem_used_mb) / Number(gpu.mem_total_mb)) * 100 : null;
+  const contextPct = ai.context_max ? (Number(ai.context_used) / Number(ai.context_max)) * 100 : null;
+  let state = "GPU not installed";
+  let stateClass = "";
+  if (error && !data) {
+    state = "Status API offline";
+    stateClass = "down";
+  } else if (online) {
+    state = "online";
+    stateClass = "up";
+  } else if (down) {
+    state = "model down";
+    stateClass = "down";
+  } else if (gpu) {
+    state = "GPU in, model waiting";
+  }
+
+  return (
+    <>
+      <div className="host">
+        <span>{data?.host?.hostname || "SERVER"}</span>
+        <span className={`badge ${stateClass}`}>{state}</span>
+        {model ? <span>{model}</span> : <span>No model loaded</span>}
+        {ai.backend ? <span>{ai.backend}</span> : null}
+        {ai.uptime_seconds != null ? <span>{formatUptime(ai.uptime_seconds)}</span> : null}
+      </div>
+      <section className="meters">
+        <Meter lead label="Decode" value={dash(ai.tokens_per_sec, 1)} note="tokens / sec" />
+        <Meter label="Prefill" value={dash(ai.prefill_tokens_per_sec)} note="prompt tokens / sec" />
+        <Meter label="First token" value={dash(ai.ttft_ms)} note="milliseconds" />
+        <Meter
+          label="Context"
+          value={ai.context_max ? `${ai.context_used ?? "\u2014"} / ${ai.context_max}` : "\u2014"}
+          note="tokens in the window"
+          pct={contextPct}
+        />
+        <Meter label="Queue" value={dash(ai.queue)} note={ai.active != null ? `${ai.active} running` : "waiting requests"} />
+        <Meter label="Last reply" value={dash(ai.last_latency_ms)} note="milliseconds" />
+        <Meter
+          label="GPU"
+          value={gpu?.util_percent == null ? "\u2014" : `${Math.round(gpu.util_percent)}%`}
+          note={gpu?.name || "Not installed"}
+          pct={gpu?.util_percent}
+        />
+        <Meter
+          label="VRAM"
+          value={gpu?.mem_total_mb ? `${(Number(gpu.mem_used_mb || 0) / 1024).toFixed(1)} / ${(Number(gpu.mem_total_mb) / 1024).toFixed(1)} GB` : "\u2014"}
+          note={gpu ? "on the card" : "Not installed"}
+          pct={vramPct}
+        />
+        <Meter label="GPU temp" value={gpu?.temp_c == null ? "\u2014" : `${Math.round(gpu.temp_c)}\u00b0`} note="card" />
+        <Meter
+          label="Power"
+          value={gpu?.power_w == null ? "\u2014" : `${Math.round(gpu.power_w)} W`}
+          note={gpu?.power_limit_w ? `of ${Math.round(gpu.power_limit_w)} W` : "draw"}
+        />
       </section>
     </>
   );
