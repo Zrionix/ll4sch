@@ -137,6 +137,51 @@ a.card:hover { border-color: #4a584c; }
   font-size: 12px;
 }
 
+.meters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+.meter {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px 16px;
+}
+.meter span {
+  color: var(--muted);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.meter strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 32px;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.meter small {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bar {
+  height: 4px;
+  margin-top: 12px;
+  border-radius: 99px;
+  background: #2a332c;
+  overflow: hidden;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
 .map-wrap { margin-top: 28px; }
 .map-wrap h2 { margin: 0 0 10px; font-size: 18px; letter-spacing: -0.02em; }
 .map {
