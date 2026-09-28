@@ -11,7 +11,7 @@ const mono = IBM_Plex_Mono({
 
 export const metadata = {
   title: "ll4sch",
-  description: "Public addresses and live status for the ll4sch game servers.",
+  description: "Public addresses and live status for the ll4sch server.",
 };
 
 const links = [
@@ -29,7 +29,7 @@ export default function RootLayout({ children }) {
         <div className="wrap">
           <header className="site">
             <Link className="brand" href="/">
-              ll4sch <span>servers</span>
+              ll4sch <span>server</span>
             </Link>
             <nav>
               {links.map(([href, label]) => (
@@ -40,7 +40,7 @@ export default function RootLayout({ children }) {
             </nav>
           </header>
           <main>{children}</main>
-          <footer>Run by Zrionix</footer>
+          <footer>Zrionix</footer>
         </div>
       </body>
     </html>
