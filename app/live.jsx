@@ -18,12 +18,22 @@ const NAMES = {
   bluemap: "BlueMap",
 };
 
+const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
+
 function addressFor(svc) {
   if (PUBLIC[svc.id]) return PUBLIC[svc.id];
   const host = svc.host || "";
   const local = host === "127.0.0.1" || host === "localhost" || host.startsWith("10.");
   if (local || !svc.port) return null;
   return `${host}:${svc.port}`;
+}
+
+function sortServices(services) {
+  return [...services].sort((a, b) => {
+    const ai = ORDER.indexOf(a.id);
+    const bi = ORDER.indexOf(b.id);
+    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+  });
 }
 
 function formatUptime(seconds) {
@@ -97,7 +107,7 @@ export function Usage({ host }) {
         <strong>{gpu?.util_percent == null ? "\u2014" : `${Math.round(gpu.util_percent)}%`}</strong>
         <small>
           {gpu
-            ? `${gpu.name}${gpu.temp_c != null ? ` \u00b7 ${Math.round(gpu.temp_c)}\u00b0` : ""}`
+            ? `${gpu.name}${gpu.temp_c != null ? ` \u00b7 ${Math.round(gpu.temp_c)}\u00b0` : ""}${gpu.mem_used_mb != null ? ` \u00b7 ${gpu.mem_used_mb}/${gpu.mem_total_mb} MB` : ""}`
             : "Not installed"}
         </small>
         {gpu ? (
@@ -109,7 +119,7 @@ export function Usage({ host }) {
 }
 
 export function ServiceCards({ services }) {
-  return services.map((svc) => {
+  return sortServices(services).map((svc) => {
     const address = addressFor(svc);
     return (
       <article className="card" key={svc.id || svc.name}>
@@ -119,7 +129,6 @@ export function ServiceCards({ services }) {
             {svc.online == null ? "waiting" : svc.online ? "online" : "down"}
           </p>
         </div>
-        {svc.kind ? <p>{svc.kind}</p> : null}
         {address ? <div className="ip">{address}</div> : null}
         {svc.players_online != null ? (
           <p style={{ marginTop: 8 }}>
@@ -128,9 +137,8 @@ export function ServiceCards({ services }) {
           </p>
         ) : null}
         {svc.motd ? <p style={{ marginTop: 8 }}>{svc.motd}</p> : null}
-        {svc.server_name ? <p style={{ marginTop: 8 }}>{svc.server_name}</p> : null}
-        {svc.process?.rss_mb != null ? (
-          <p style={{ marginTop: 8 }}>Process RAM {svc.process.rss_mb} MB</p>
+        {svc.server_name && svc.server_name !== svc.motd ? (
+          <p style={{ marginTop: 8 }}>{svc.server_name}</p>
         ) : null}
       </article>
     );
@@ -158,7 +166,7 @@ export function LiveBoard() {
   const host = data?.host;
   const services = data?.services?.length
     ? data.services
-    : ["minecraft", "valheim", "discord", "bluemap"].map((id) => ({ id, name: NAMES[id] }));
+    : ["minecraft", "valheim", "bluemap", "discord"].map((id) => ({ id, name: NAMES[id] }));
 
   return (
     <>
