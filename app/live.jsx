@@ -157,6 +157,12 @@ export function ServiceCards({ services }) {
   });
 }
 
+function formatCpu(cpu) {
+  const n = Number(cpu);
+  if (!Number.isFinite(n)) return "\u2014";
+  if (n > 100) return `${(n / 100).toFixed(1)} cores`;
+  return `${Math.round(n)}%`;
+}
 function formatRam(mb) {
   const n = Number(mb);
   if (!Number.isFinite(n)) return "\u2014";
@@ -192,9 +198,9 @@ export function ProcessUsage({ services }) {
         <Fragment key={row.id}>
           <article className="meter">
             <span>{single ? "CPU" : `${row.name} CPU`}</span>
-            <strong>{row.cpu == null || row.cpu === "" ? "\u2014" : `${Math.round(Number(row.cpu))}%`}</strong>
+            <strong>{formatCpu(row.cpu)}</strong>
             <small>{row.exe || "process"}</small>
-            {row.cpu == null || row.cpu === "" ? null : (
+            {row.cpu == null || row.cpu === "" || Number(row.cpu) > 100 ? null : (
               <div className="bar"><i style={{ width: `${clamp(row.cpu)}%` }} /></div>
             )}
           </article>
