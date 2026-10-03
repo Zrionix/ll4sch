@@ -21,8 +21,8 @@ STATUS_URL = "https://monitor.ll4sch.com/api/status"
 TIMEOUT = 4
 
 PUBLIC = {
-    "minecraft": "216.228.185.138:25565",
-    "valheim": "216.228.185.138:2456",
+    "minecraft": "mc.ll4sch.com",
+    "valheim": "204.15.62.126:2456",
     "bluemap": "map.ll4sch.com",
 }
 

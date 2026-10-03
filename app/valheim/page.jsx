@@ -12,7 +12,7 @@ export default function ValheimPage() {
         World Troglodies. Direct connect on the address below. Ask Zrionix
         on Discord before you join.
       </p>
-      <div className="ip hero">216.228.185.138:2456</div>
+      <div className="ip hero">204.15.62.126:2456</div>
       <LiveServer ids={["valheim"]} />
       <LogFeed id="valheim" title="Valheim console" />
     </>

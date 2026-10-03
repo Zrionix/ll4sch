@@ -17,7 +17,7 @@ const servers = [
     href: "/valheim",
     title: "Valheim",
     copy: "World Troglodies. Direct connect.",
-    ip: "216.228.185.138:2456",
+    ip: "204.15.62.126:2456",
   },
   {
     href: "/ai",
