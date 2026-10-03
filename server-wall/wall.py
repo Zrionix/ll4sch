@@ -40,11 +40,11 @@ LOG_NAMES = {
 }
 SERVERS = (
     ("main", "Main"),
-    ("minecraft-new", "Minecraft"),
-    ("minecraft", "Original Java"),
+    ("minecraft-new", "Three Peaks"),
+    ("minecraft", "OG Java"),
     ("valheim", "Valheim"),
     ("discord", "Discord"),
-    ("bluemap", "Original map"),
+    ("bluemap", "OG map"),
 )
 
 state_lock = threading.Lock()
