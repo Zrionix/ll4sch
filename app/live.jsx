@@ -15,11 +15,11 @@ const PUBLIC = {
 
 const NAMES = {
   minecraft: "OG Java",
-  "minecraft-new": "Three Peaks",
+  "minecraft-new": "New Java",
   valheim: "Valheim",
   discord: "Discord Bot",
   bluemap: "OG map",
-  "bluemap-new": "Peaks map",
+  "bluemap-new": "New map",
 };
 
 const ORDER = ["minecraft-new", "minecraft", "valheim", "bluemap-new", "bluemap", "discord"];

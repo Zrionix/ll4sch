@@ -9,7 +9,7 @@ const servers = [
   },
   {
     href: "/minecraft",
-    title: "Three Peaks",
+    title: "New Java",
     copy: "The new Paper world.",
     ip: "mc.ll4sch.com",
   },

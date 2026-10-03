@@ -40,7 +40,7 @@ LOG_NAMES = {
 }
 SERVERS = (
     ("main", "Main"),
-    ("minecraft-new", "Three Peaks"),
+    ("minecraft-new", "New Java"),
     ("minecraft", "OG Java"),
     ("valheim", "Valheim"),
     ("discord", "Discord"),

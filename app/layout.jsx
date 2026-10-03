@@ -17,7 +17,7 @@ export const metadata = {
 const links = [
   ["/", "Home"],
   ["/java-minecraft-server", "OG Java"],
-  ["/minecraft", "Three Peaks"],
+  ["/minecraft", "New Java"],
   ["/valheim", "Valheim"],
   ["/servermonitor", "Monitor"],
   ["/ai", "AI"],
