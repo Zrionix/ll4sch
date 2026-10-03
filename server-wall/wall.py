@@ -40,10 +40,11 @@ LOG_NAMES = {
 }
 SERVERS = (
     ("main", "Main"),
-    ("minecraft", "OG"),
+    ("minecraft-new", "Minecraft"),
+    ("minecraft", "Original Java"),
     ("valheim", "Valheim"),
     ("discord", "Discord"),
-    ("bluemap", "BlueMap"),
+    ("bluemap", "Original map"),
 )
 
 state_lock = threading.Lock()
@@ -161,12 +162,15 @@ def tail(path: str, max_lines: int = 40, max_bytes: int = 64000) -> list[str]:
 def classify(path: str) -> str:
     low = path.lower()
     name = os.path.basename(low)
+    new = "server 2" in low
     if "valheim" in low:
         return "valheim"
     if "discord" in low or "demetrius" in low:
         return "discord"
     if "bluemap" in low:
-        return "bluemap"
+        return "bluemap-new" if new else "bluemap"
+    if new:
+        return "minecraft-new"
     if "paper" in low or "minecraft" in low or "papermc" in low or name == "latest.log":
         return "minecraft"
     return "main"
@@ -186,8 +190,10 @@ def rank(name: str) -> int:
 
 PINNED_LOGS = {
     "minecraft": r"C:\Users\Admin\Desktop\PaperMC server\logs\latest.log",
+    "minecraft-new": r"C:\Users\Admin\Desktop\PaperMC server 2\logs\latest.log",
     "valheim": r"C:\Users\Admin\Documents\ValheimServerLogs\troglodies.log",
     "bluemap": r"C:\Users\Admin\Desktop\PaperMC server\bluemap\logs\webserver.log",
+    "bluemap-new": r"C:\Users\Admin\Desktop\PaperMC server 2\bluemap\logs\webserver.log",
 }
 
 

@@ -62,8 +62,8 @@
     .addr { font-family: "Cascadia Mono", Consolas, monospace; font-size: 18px; margin: 12px 0 0; color: var(--ink); }
     .logboard {
       display: grid;
-      grid-template-columns: 1.45fr 1fr 1fr;
-      grid-template-rows: 1fr 1fr;
+      grid-template-columns: 1.35fr 1fr 1fr;
+      grid-template-rows: 1fr 1fr 1fr;
       gap: 12px;
       min-height: 0;
     }
@@ -74,7 +74,7 @@
       display: flex;
       flex-direction: column;
     }
-    .logpane.main { grid-row: 1 / span 2; }
+    .logpane.main { grid-row: 1 / span 3; }
     .logpane h2 {
       margin: 0;
       font-size: 12px;
@@ -122,17 +122,26 @@
   <section class="logboard" id="logboard"></section>
   <script>
     const PUBLIC = {
-      minecraft: "mc.ll4sch.com",
+      minecraft: "og.ll4sch.com",
+      "minecraft-new": "mc.ll4sch.com",
       valheim: "216.228.185.138:2456",
-      bluemap: "map.ll4sch.com"
+      bluemap: "ogmap.ll4sch.com",
+      "bluemap-new": "map.ll4sch.com"
     };
-    const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
+    const LABELS = {
+      minecraft: "Original Java",
+      "minecraft-new": "Minecraft",
+      bluemap: "Original map",
+      "bluemap-new": "Map"
+    };
+    const ORDER = ["minecraft-new", "minecraft", "valheim", "bluemap-new", "bluemap", "discord"];
     const PANES = [
       { id: "main", title: "Main" },
-      { id: "minecraft", title: "OG" },
+      { id: "minecraft-new", title: "Minecraft" },
+      { id: "minecraft", title: "Original Java" },
       { id: "valheim", title: "Valheim" },
       { id: "discord", title: "Discord" },
-      { id: "bluemap", title: "BlueMap" }
+      { id: "bluemap", title: "Original map" }
     ];
 
     function clamp(n) {
@@ -164,7 +173,7 @@
       const players = svc.players_online != null
         ? "Players " + svc.players_online + (svc.players_max != null ? " / " + svc.players_max : "")
         : (svc.motd || svc.version || "");
-      var label = svc.id === "minecraft" ? "OG" : (svc.name || svc.id);
+      var label = LABELS[svc.id] || svc.name || svc.id;
       return '<article class="card"><div class="row"><span class="name">' + label +
         '</span><p class="badge ' + (on ? "up" : wait ? "" : "down") + '">' + badge +
         '</p></div><p class="addr">' + address(svc) + '</p><p>' + players + '</p></article>';

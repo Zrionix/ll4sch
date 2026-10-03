@@ -6,19 +6,23 @@ const STATUS_API =
   process.env.NEXT_PUBLIC_STATUS_API || "https://monitor.ll4sch.com/api/status";
 
 const PUBLIC = {
-  minecraft: "mc.ll4sch.com",
+  minecraft: "og.ll4sch.com",
+  "minecraft-new": "mc.ll4sch.com",
   valheim: "216.228.185.138:2456",
-  bluemap: "map.ll4sch.com",
+  bluemap: "ogmap.ll4sch.com",
+  "bluemap-new": "map.ll4sch.com",
 };
 
 const NAMES = {
-  minecraft: "OG",
+  minecraft: "Original Java",
+  "minecraft-new": "Minecraft",
   valheim: "Valheim",
   discord: "Discord Bot",
-  bluemap: "BlueMap",
+  bluemap: "Original map",
+  "bluemap-new": "Map",
 };
 
-const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
+const ORDER = ["minecraft-new", "minecraft", "valheim", "bluemap-new", "bluemap", "discord"];
 
 function addressFor(svc) {
   if (PUBLIC[svc.id]) return PUBLIC[svc.id];
@@ -226,7 +230,7 @@ export function LiveBoard() {
   const host = data?.host;
   const services = data?.services?.length
     ? data.services
-    : ["minecraft", "valheim", "bluemap", "discord"].map((id) => ({ id, name: NAMES[id] }));
+    : ["minecraft-new", "minecraft", "valheim", "bluemap-new", "bluemap", "discord"].map((id) => ({ id, name: NAMES[id] }));
 
   return (
     <>

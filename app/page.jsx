@@ -2,10 +2,16 @@ import Link from "next/link";
 
 const servers = [
   {
-    href: "/java-minecraft-server",
-    title: "OG",
-    copy: "Current Paper world. A new world is next.",
+    href: "/minecraft",
+    title: "Minecraft",
+    copy: "The new Paper world.",
     ip: "mc.ll4sch.com",
+  },
+  {
+    href: "/java-minecraft-server",
+    title: "Original Java",
+    copy: "The first Paper world.",
+    ip: "og.ll4sch.com",
   },
   {
     href: "/valheim",
