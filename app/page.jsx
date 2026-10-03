@@ -3,8 +3,8 @@ import Link from "next/link";
 const servers = [
   {
     href: "/java-minecraft-server",
-    title: "Java Minecraft",
-    copy: "Java Edition. Live map on this page.",
+    title: "OG",
+    copy: "Current Paper world. A new world is next.",
     ip: "mc.ll4sch.com",
   },
   {

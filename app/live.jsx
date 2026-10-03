@@ -12,7 +12,7 @@ const PUBLIC = {
 };
 
 const NAMES = {
-  minecraft: "PaperMC",
+  minecraft: "OG",
   valheim: "Valheim",
   discord: "Discord Bot",
   bluemap: "BlueMap",
@@ -132,7 +132,7 @@ export function ServiceCards({ services }) {
     return (
       <article className="card" key={svc.id || svc.name}>
         <div className="row">
-          <h2>{svc.name || NAMES[svc.id] || svc.id}</h2>
+          <h2>{NAMES[svc.id] || svc.name || svc.id}</h2>
           <p className={`badge ${svc.online == null ? "" : svc.online ? "up" : "down"}`}>
             {svc.online == null ? "\u2014" : svc.online ? "online" : "down"}
           </p>
@@ -170,7 +170,7 @@ function processRows(services) {
     if (proc.pid != null) seen.add(proc.pid);
     rows.push({
       id: svc.id || svc.name,
-      name: svc.name || NAMES[svc.id] || svc.id,
+      name: NAMES[svc.id] || svc.name || svc.id,
       cpu: proc.cpu_percent,
       ram: proc.rss_mb ?? proc.memory_mb,
       exe: proc.name || "",

@@ -129,7 +129,7 @@
     const ORDER = ["minecraft", "valheim", "bluemap", "discord"];
     const PANES = [
       { id: "main", title: "Main" },
-      { id: "minecraft", title: "Paper" },
+      { id: "minecraft", title: "OG" },
       { id: "valheim", title: "Valheim" },
       { id: "discord", title: "Discord" },
       { id: "bluemap", title: "BlueMap" }
@@ -164,7 +164,8 @@
       const players = svc.players_online != null
         ? "Players " + svc.players_online + (svc.players_max != null ? " / " + svc.players_max : "")
         : (svc.motd || svc.version || "");
-      return '<article class="card"><div class="row"><span class="name">' + (svc.name || svc.id) +
+      var label = svc.id === "minecraft" ? "OG" : (svc.name || svc.id);
+      return '<article class="card"><div class="row"><span class="name">' + label +
         '</span><p class="badge ' + (on ? "up" : wait ? "" : "down") + '">' + badge +
         '</p></div><p class="addr">' + address(svc) + '</p><p>' + players + '</p></article>';
     }
