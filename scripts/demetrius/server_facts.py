@@ -22,7 +22,7 @@ TIMEOUT = 4
 
 PUBLIC = {
     "minecraft": "mc.ll4sch.com",
-    "valheim": "204.15.62.126:2456",
+    "valheim": "204.15.63.135:2456",
     "bluemap": "map.ll4sch.com",
 }
 
