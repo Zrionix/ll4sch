@@ -8,7 +8,7 @@ const STATUS_API =
 const PUBLIC = {
   minecraft: "og.ll4sch.com",
   "minecraft-new": "mc.ll4sch.com",
-  valheim: "208.100.174.90:2456",
+  valheim: "208.100.174.95:2456",
   bluemap: "ogmap.ll4sch.com",
   "bluemap-new": "map.ll4sch.com",
 };
